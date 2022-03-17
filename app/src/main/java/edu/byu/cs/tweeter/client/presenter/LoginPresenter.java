@@ -1,5 +1,6 @@
 package edu.byu.cs.tweeter.client.presenter;
 
+import android.text.Editable;
 import android.util.Log;
 
 import edu.byu.cs.tweeter.client.cache.Cache;
@@ -48,6 +49,18 @@ public class LoginPresenter implements UserService.LoginObserver {
         UserService userService = new UserService();
         LoginRequest loginRequest = new LoginRequest(username, password);
         userService.login(username, password, this);
+    }
+
+    public void validateLogin(Editable alias, Editable password) {
+        if (alias.charAt(0) != '@') {
+            throw new IllegalArgumentException("Alias must begin with @.");
+        }
+        if (alias.length() < 2) {
+            throw new IllegalArgumentException("Alias must contain 1 or more characters after the @.");
+        }
+        if (password.length() == 0) {
+            throw new IllegalArgumentException("Password cannot be empty.");
+        }
     }
 
     /**

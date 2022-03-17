@@ -1,9 +1,13 @@
-package edu.byu.cs.tweeter.client.model.service;
+package edu.byu.cs.tweeter.client.model.service.backgroundTask;
 
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
+
+import java.io.IOException;
+
+import edu.byu.cs.tweeter.util.FakeData;
 
 public abstract class BackgroundTask implements Runnable {
 
@@ -28,6 +32,14 @@ public abstract class BackgroundTask implements Runnable {
             sendExceptionMessage(ex);
         }
     }
+
+    //take this out after refactoring!!
+    protected FakeData getFakeData() {
+        return new FakeData();
+    }
+
+//    protected abstract void runTask() throws IOException;
+
 
     // This method is public instead of protected to make it accessible to test cases
     public void sendSuccessMessage() {
@@ -65,5 +77,5 @@ public abstract class BackgroundTask implements Runnable {
         messageHandler.sendMessage(msg);
     }
 
-    protected abstract void runTask();
+    protected abstract void runTask() throws IOException;
 }

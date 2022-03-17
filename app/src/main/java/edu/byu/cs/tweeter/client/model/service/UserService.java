@@ -7,6 +7,11 @@ import android.os.Message;
 import android.util.Log;
 
 import edu.byu.cs.tweeter.client.model.net.ServerFacade;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.BackgroundTask;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.BackgroundTaskUtils;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.GetUserTask;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.LogoutTask;
+import edu.byu.cs.tweeter.client.model.service.backgroundTask.RegisterTask;
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
 import edu.byu.cs.tweeter.model.net.request.LoginRequest;
@@ -15,7 +20,7 @@ import edu.byu.cs.tweeter.model.net.response.LoginResponse;
 /**
  * Contains the business logic to support the login operation.
  */
-public class UserService {
+public class UserService extends Service {
 
     private static final String URL_PATH = "/login";
 
@@ -169,4 +174,148 @@ public class UserService {
             msgBundle.putSerializable(AUTH_TOKEN_KEY, this.authToken);
         }
     }
+
+    public interface GetUserObserver extends Observer {
+        void handleSuccess(User user);
+        void sendMessage(String message);
+    }
+
+    public interface RegisterObserver extends Observer {
+        void handleSuccess(User registeredUser, AuthToken authToken);
+    }
+
+    public interface LogoutObserver extends Observer {
+        void handleSuccess();
+    }
+
+    public void getUser(AuthToken currUserAuthToken, String userAliasString, GetUserObserver getUserObserver) {
+        GetUserTask getUserTask = new GetUserTask(currUserAuthToken,
+                userAliasString, new GetUserHandler(getUserObserver));
+        executeSingleThread(getUserTask);
+
+        getUserObserver.sendMessage("Getting user's profile...");
+    }
+
+    public void register(String firstName, String lastName, String alias, String password, String imageBytesBase64, RegisterObserver registerObserver) {
+        RegisterTask registerTask = new RegisterTask(firstName, lastName,
+                alias, password, imageBytesBase64, new RegisterHandler(registerObserver));
+        executeSingleThread(registerTask);
+
+    }
+
+    public void logout(AuthToken currUserAuthToken, LogoutObserver logoutObserver) {
+        LogoutTask logoutTask = new LogoutTask(currUserAuthToken, new LogoutHandler(logoutObserver));
+        executeSingleThread(logoutTask);
+
+    }
+
+    /**
+     * Message handler (i.e., observer) for GetUserTask.
+     */
+    private class GetUserHandler extends Handle {
+
+        private GetUserObserver observer;
+
+        public GetUserHandler(GetUserObserver observer) {
+            this.observer = observer;
+        }
+
+        public GetUserObserver getObserver() {
+            return observer;
+        }
+
+        @Override
+        public String getTaskMessageKey() {
+            return GetUserTask.MESSAGE_KEY;
+        }
+
+        @Override
+        public String getTaskExceptionKey() {
+            return GetUserTask.EXCEPTION_KEY;
+        }
+
+        @Override
+        public String getTaskSuccessKey() {
+            return GetUserTask.SUCCESS_KEY;
+        }
+
+        @Override
+        public void handleMessageSuccess(Message msg) {
+            User user = (User) msg.getData().getSerializable(GetUserTask.USER_KEY);
+            observer.handleSuccess(user);
+        }
+    }
+
+    // RegisterHandler
+
+    private class RegisterHandler extends Handle {
+        private RegisterObserver observer;
+
+        public RegisterHandler(RegisterObserver observer) {
+            this.observer = observer;
+        }
+
+        @Override
+        public void handleMessageSuccess(Message msg) {
+            User registeredUser = (User) msg.getData().getSerializable(RegisterTask.USER_KEY);
+            AuthToken authToken = (AuthToken) msg.getData().getSerializable(RegisterTask.AUTH_TOKEN_KEY);
+            observer.handleSuccess(registeredUser, authToken);
+        }
+
+        @Override
+        public RegisterObserver getObserver() {
+            return observer;
+        }
+
+        @Override
+        public String getTaskMessageKey() {
+            return RegisterTask.MESSAGE_KEY;
+        }
+
+        @Override
+        public String getTaskExceptionKey() {
+            return RegisterTask.EXCEPTION_KEY;
+        }
+
+        @Override
+        public String getTaskSuccessKey() {
+            return RegisterTask.SUCCESS_KEY;
+        }
+    }
+
+    // LogoutHandler
+
+    private class LogoutHandler extends Handle {
+        private LogoutObserver observer;
+
+        public LogoutHandler(LogoutObserver observer) {
+            this.observer = observer;
+        }
+
+        @Override
+        public void handleMessageSuccess(Message msg) {
+            observer.handleSuccess();
+        }
+
+        @Override
+        public LogoutObserver getObserver() {
+            return observer;
+        }
+
+        @Override
+        public String getTaskMessageKey() {
+            return LogoutTask.MESSAGE_KEY;
+        }
+
+        @Override
+        public String getTaskExceptionKey() {
+            return LogoutTask.EXCEPTION_KEY;
+        }
+
+        @Override
+        public String getTaskSuccessKey() {
+            return LogoutTask.SUCCESS_KEY;
+        }
+    }
+
 }
