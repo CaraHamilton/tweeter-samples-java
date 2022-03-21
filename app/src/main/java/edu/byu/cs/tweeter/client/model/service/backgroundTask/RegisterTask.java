@@ -2,8 +2,15 @@ package edu.byu.cs.tweeter.client.model.service.backgroundTask;
 
 import android.os.Handler;
 
+import java.io.IOException;
+
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
+import edu.byu.cs.tweeter.model.net.TweeterRemoteException;
+import edu.byu.cs.tweeter.model.net.request.LoginRequest;
+import edu.byu.cs.tweeter.model.net.request.RegisterRequest;
+import edu.byu.cs.tweeter.model.net.response.LoginResponse;
+import edu.byu.cs.tweeter.model.net.response.RegisterResponse;
 import edu.byu.cs.tweeter.util.Pair;
 
 /**
@@ -39,5 +46,21 @@ public class RegisterTask extends AuthenticateTask {
         User registeredUser = getFakeData().getFirstUser();
         AuthToken authToken = getFakeData().getAuthToken();
         return new Pair<>(registeredUser, authToken);
+    }
+
+    @Override
+    protected void runSendRequest(AuthToken authToken, String username, String password) throws IOException, TweeterRemoteException {
+        String URL_PATH = "/register";
+        RegisterRequest request = new RegisterRequest(firstName, lastName, image, username, password);
+        RegisterResponse response = getServerFacade().register(request, URL_PATH);
+
+        if(response.isSuccess()) {
+            setAuthenticatedUser(response.getUser());
+            setAuthToken(response.getAuthToken());
+            sendSuccessMessage();
+        }
+        else {
+            sendFailedMessage(response.getMessage());
+        }
     }
 }

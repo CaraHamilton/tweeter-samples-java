@@ -1,7 +1,19 @@
 package edu.byu.cs.tweeter.server.service;
 
+import edu.byu.cs.tweeter.model.net.request.FollowRequest;
+import edu.byu.cs.tweeter.model.net.request.FollowersCountRequest;
+import edu.byu.cs.tweeter.model.net.request.FollowersRequest;
+import edu.byu.cs.tweeter.model.net.request.FollowingCountRequest;
 import edu.byu.cs.tweeter.model.net.request.FollowingRequest;
+import edu.byu.cs.tweeter.model.net.request.IsFollowerRequest;
+import edu.byu.cs.tweeter.model.net.request.UnfollowRequest;
+import edu.byu.cs.tweeter.model.net.response.FollowResponse;
+import edu.byu.cs.tweeter.model.net.response.FollowersCountResponse;
+import edu.byu.cs.tweeter.model.net.response.FollowersResponse;
+import edu.byu.cs.tweeter.model.net.response.FollowingCountResponse;
 import edu.byu.cs.tweeter.model.net.response.FollowingResponse;
+import edu.byu.cs.tweeter.model.net.response.IsFollowerResponse;
+import edu.byu.cs.tweeter.model.net.response.UnfollowResponse;
 import edu.byu.cs.tweeter.server.dao.FollowDAO;
 
 /**
@@ -19,7 +31,7 @@ public class FollowService {
      * @return the followees.
      */
     public FollowingResponse getFollowees(FollowingRequest request) {
-        if(request.getFollowerAlias() == null) {
+        if(request.getFollowerAlias() == null) { //do you need to check for auth token
             throw new RuntimeException("[BadRequest] Request needs to have a follower alias");
         } else if(request.getLimit() <= 0) {
             throw new RuntimeException("[BadRequest] Request needs to have a positive limit");
@@ -36,5 +48,58 @@ public class FollowService {
      */
     FollowDAO getFollowingDAO() {
         return new FollowDAO();
+    }
+
+
+    public FollowersResponse getFollowers(FollowersRequest request) {
+        if(request.getFolloweeAlias() == null) {
+            throw new RuntimeException("[BadRequest] Request needs to have a followee alias");
+        } else if(request.getLimit() <= 0) {
+            throw new RuntimeException("[BadRequest] Request needs to have a positive limit");
+        }
+        return getFollowersDAO().getFollowers(request);
+    }
+
+    FollowDAO getFollowersDAO() { return new FollowDAO(); }
+
+    public FollowResponse follow(FollowRequest request) {
+        if(request.getFollowee() == null) {
+            throw new RuntimeException("[BadRequest] Request needs to have a followee");
+        }
+        return new FollowResponse();
+    }
+
+    public UnfollowResponse unfollow(UnfollowRequest request) {
+        if(request.getFollowee() == null) {
+            throw new RuntimeException("[BadRequest] Request needs to have a followee");
+        }
+        return new UnfollowResponse();
+    }
+
+    public IsFollowerResponse isFollower(IsFollowerRequest request) {
+        if(request.getFolloweeAlias() == null) { //do you need to check for auth token
+            throw new RuntimeException("[BadRequest] Request needs to have a followee alias");
+        } else if(request.getFollowerAlias() == null) {
+            throw new RuntimeException("[BadRequest] Request needs to have a follower alias");
+        }
+        return getFollowingDAO().isFollower(request);
+    }
+
+    public FollowersCountResponse getFollowersCount(FollowersCountRequest request) {
+        if(request.getUser() == null) { //do you need to check for auth token
+            throw new RuntimeException("[BadRequest] Request needs to have a user alias");
+        }
+        int count = getFollowingDAO().getFollowersCount(request.getUser());
+        FollowersCountResponse response = new FollowersCountResponse(count);
+        return response;
+    }
+
+    public FollowingCountResponse getFollowingCount(FollowingCountRequest request) {
+        if(request.getUser() == null) { //do you need to check for auth token
+            throw new RuntimeException("[BadRequest] Request needs to have a user alias");
+        }
+        int count = getFollowingDAO().getFolloweeCount(request.getUser());
+        FollowingCountResponse response = new FollowingCountResponse(count);
+        return response;
     }
 }

@@ -7,14 +7,18 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.List;
 
+import edu.byu.cs.tweeter.client.model.net.ServerFacade;
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
+import edu.byu.cs.tweeter.model.net.TweeterRemoteException;
 import edu.byu.cs.tweeter.util.Pair;
 
 public abstract class PagedTask<T> extends AuthenticatedTask {
 
     public static final String ITEMS_KEY = "items";
     public static final String MORE_PAGES_KEY = "more-pages";
+
+//    private ServerFacade serverFacade;
 
     /**
      * The user whose items are being retrieved.
@@ -51,6 +55,22 @@ public abstract class PagedTask<T> extends AuthenticatedTask {
         this.lastItem = lastItem;
     }
 
+//    public ServerFacade getServerFacade() {
+//        if(serverFacade == null) {
+//            serverFacade = new ServerFacade();
+//        }
+//
+//        return new ServerFacade();
+//    }
+
+    public void setItems(List<T> items) {
+        this.items = items;
+    }
+
+    public void setHasMorePages(boolean hasMorePages) {
+        this.hasMorePages = hasMorePages;
+    }
+
     protected User getTargetUser() {
         return targetUser;
     }
@@ -64,19 +84,23 @@ public abstract class PagedTask<T> extends AuthenticatedTask {
     }
 
     @Override
-    protected final void runTask() throws IOException {
-        Pair<List<T>, Boolean> pageOfItems = getItems();
+    protected final void runTask() throws IOException, TweeterRemoteException {
+//        Pair<List<T>, Boolean> pageOfItems = sendRequest();
+//
+//        items = pageOfItems.getFirst();
+//        hasMorePages = pageOfItems.getSecond();
 
-        items = pageOfItems.getFirst();
-        hasMorePages = pageOfItems.getSecond();
+        runSendRequest(getAuthToken(), targetUser, limit, lastItem, items);
 
         // Call sendSuccessMessage if successful
-        sendSuccessMessage();
+//        sendSuccessMessage();
         // or call sendFailedMessage if not successful
         // sendFailedMessage()
     }
 
-    protected abstract Pair<List<T>, Boolean> getItems();
+//    protected abstract Pair<List<T>, Boolean> sendRequest();
+
+    protected abstract void runSendRequest(AuthToken authToken, User targetUser, int limit, T lastItem, List<T> items) throws IOException, TweeterRemoteException;
 
     protected abstract List<User> getUsersForItems(List<T> items);
 

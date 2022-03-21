@@ -2,8 +2,15 @@ package edu.byu.cs.tweeter.client.model.service.backgroundTask;
 
 import android.os.Handler;
 
+import java.io.IOException;
+
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.Status;
+import edu.byu.cs.tweeter.model.net.TweeterRemoteException;
+import edu.byu.cs.tweeter.model.net.request.FollowingRequest;
+import edu.byu.cs.tweeter.model.net.request.PostStatusRequest;
+import edu.byu.cs.tweeter.model.net.response.FollowingResponse;
+import edu.byu.cs.tweeter.model.net.response.PostStatusResponse;
 
 /**
  * Background task that posts a new status sent by a user.
@@ -22,14 +29,21 @@ public class PostStatusTask extends AuthenticatedTask {
     }
 
     @Override
-    protected void runTask() {
+    protected void runTask() throws IOException, TweeterRemoteException {
         // We could do this from the presenter, without a task and handler, but we will
         // eventually access the database from here when we aren't using dummy data.
 
-        // Call sendSuccessMessage if successful
-        sendSuccessMessage();
-        // or call sendFailedMessage if not successful
-        // sendFailedMessage()
+        String URL_PATH = "/poststatus";
+
+        PostStatusRequest request = new PostStatusRequest(getAuthToken(), status);
+        PostStatusResponse response = getServerFacade().postStatus(request, URL_PATH);
+
+        if(response.isSuccess()) {
+            sendSuccessMessage();
+        }
+        else {
+            sendFailedMessage(response.getMessage());
+        }
     }
 
 }
