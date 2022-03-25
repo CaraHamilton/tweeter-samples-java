@@ -52,11 +52,11 @@ public class FollowingPresenterTest {
 
         // Create the mocks and spies needed to let test cases control what users are returned
         // FollowService.
-        FollowingPresenter followingPresenter = new FollowingPresenter(followingViewMock, fakeUser, fakeAuthToken);
+        FollowingPresenter followingPresenter = new FollowingPresenter(followingViewMock);
         followingPresenterSpy = Mockito.spy(followingPresenter);
 
         followingServiceMock = Mockito.mock(FollowService.class);
-        Mockito.doReturn(followingServiceMock).when(followingPresenterSpy).getFollowingService();
+        Mockito.doReturn(followingServiceMock).when(followingPresenterSpy).getFollowService();
     }
 
     /**
@@ -64,8 +64,8 @@ public class FollowingPresenterTest {
      */
     @Test
     public void testInitialPresenterState() {
-        assertNull(followingPresenterSpy.getLastFollowee());
-        assertTrue(followingPresenterSpy.isHasMorePages());
+        assertNull(followingPresenterSpy.getLastItem());
+        assertTrue(followingPresenterSpy.hasMorePages());
         assertFalse(followingPresenterSpy.isLoading());
     }
 
@@ -85,7 +85,7 @@ public class FollowingPresenterTest {
                 Assert.assertEquals(fakeUser, user);
                 Assert.assertEquals(fakeAuthToken, authToken);
                 Assert.assertEquals(limit, FollowingPresenter.PAGE_SIZE);
-                Assert.assertEquals(lastFollowee, followingPresenterSpy.getLastFollowee());
+                Assert.assertEquals(lastFollowee, followingPresenterSpy.getLastItem());
 
                 FollowService.GetFollowingObserver observer = invocation.getArgument(4);
                 observer.handleSuccess(followees, true);
@@ -93,7 +93,7 @@ public class FollowingPresenterTest {
             }
         };
         Mockito.doAnswer(manyFolloweesAnswer).when(followingServiceMock).getFollowees(Mockito.any(), Mockito.any(), Mockito.anyInt(), Mockito.any(), Mockito.any());
-        followingPresenterSpy.loadMoreItems();
+        followingPresenterSpy.loadMoreItems(fakeUser);
     }
 
 
@@ -116,10 +116,10 @@ public class FollowingPresenterTest {
         };
         Mockito.doAnswer(manyFolloweesAnswer).when(followingServiceMock).getFollowees(Mockito.any(), Mockito.any(), Mockito.anyInt(), Mockito.any(), Mockito.any());
 
-        followingPresenterSpy.loadMoreItems();
+        followingPresenterSpy.loadMoreItems(fakeUser);
 
-        assertEquals(user5, followingPresenterSpy.getLastFollowee());
-        assertTrue(followingPresenterSpy.isHasMorePages());
+        assertEquals(user5, followingPresenterSpy.getLastItem());
+        assertTrue(followingPresenterSpy.hasMorePages());
         assertFalse(followingPresenterSpy.isLoading());
 
         Mockito.verify(followingViewMock).setLoading(true);
@@ -143,7 +143,7 @@ public class FollowingPresenterTest {
         };
         Mockito.doAnswer(failureAnswer).when(followingServiceMock).getFollowees(Mockito.any(), Mockito.any(), Mockito.anyInt(), Mockito.any(), Mockito.any());
 
-        followingPresenterSpy.loadMoreItems();
+        followingPresenterSpy.loadMoreItems(fakeUser);
 
         assertFalse(followingPresenterSpy.isLoading());
 
@@ -165,7 +165,7 @@ public class FollowingPresenterTest {
         };
         Mockito.doAnswer(exceptionAnswer).when(followingServiceMock).getFollowees(Mockito.any(), Mockito.any(), Mockito.anyInt(), Mockito.any(), Mockito.any());
 
-        followingPresenterSpy.loadMoreItems();
+        followingPresenterSpy.loadMoreItems(fakeUser);
 
 
         assertFalse(followingPresenterSpy.isLoading());

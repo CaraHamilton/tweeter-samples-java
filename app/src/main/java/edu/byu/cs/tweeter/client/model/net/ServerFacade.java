@@ -44,6 +44,10 @@ public class ServerFacade {
 
     private final ClientCommunicator clientCommunicator = new ClientCommunicator(SERVER_URL);
 
+    public ClientCommunicator getClientCommunicator() {
+        return clientCommunicator;
+    }
+
     /**
      * Performs a login and if successful, returns the logged in user and an auth token.
      *

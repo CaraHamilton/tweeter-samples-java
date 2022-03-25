@@ -13,9 +13,9 @@ public abstract class PagedPresenter<T> extends Presenter<PagedPresenter.ViewPag
     public static final int PAGE_SIZE = 10;
 
     public UserService userService;
-
+    
     public T lastItem;
-    public boolean hasMorePages;
+    public boolean hasMorePages = true;
     public boolean isLoading = false;
 
     protected PagedPresenter(ViewPages<T> view) {
@@ -33,6 +33,10 @@ public abstract class PagedPresenter<T> extends Presenter<PagedPresenter.ViewPag
 
     public boolean isLoading() {
         return isLoading;
+    }
+
+    public T getLastItem() {
+        return lastItem;
     }
 
     public void loadMoreItems(User user) {
