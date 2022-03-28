@@ -13,6 +13,10 @@ public class StoryPresenter extends PagedPresenter<Status> {
 
     private StatusService statusService;
 
+    public StatusService getStatusService() {
+        return statusService;
+    }
+
     public StoryPresenter(View view) {
         super(view);
         statusService = new StatusService();

@@ -39,7 +39,7 @@ public class FollowingPresenter extends PagedPresenter<User> {
     }
 
     public class GetFollowingObserver implements FollowService.GetFollowingObserver  {
-
+        
         @Override
         public void handleSuccess(List<User> followees, boolean hasMorePages) {
             isLoading = false;

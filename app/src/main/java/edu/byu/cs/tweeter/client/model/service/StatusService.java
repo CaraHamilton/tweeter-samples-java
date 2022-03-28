@@ -2,8 +2,6 @@ package edu.byu.cs.tweeter.client.model.service;
 
 import android.os.Message;
 
-import java.util.List;
-
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.GetFeedTask;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.GetStoryTask;
 import edu.byu.cs.tweeter.client.model.service.backgroundTask.PostStatusTask;

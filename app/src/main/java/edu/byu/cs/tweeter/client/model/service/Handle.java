@@ -1,11 +1,16 @@
 package edu.byu.cs.tweeter.client.model.service;
 
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 
 import androidx.annotation.NonNull;
 
 public abstract class Handle<T extends Observer> extends Handler {
+
+    public Handle() {
+        super(Looper.getMainLooper());
+    }
 
     public abstract void handleMessageSuccess(Message msg);
 

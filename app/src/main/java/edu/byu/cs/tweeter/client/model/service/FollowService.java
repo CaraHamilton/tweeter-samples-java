@@ -120,9 +120,10 @@ public class FollowService extends Service {
     }
 
     private class GetFollowingHandler extends HandleList {
-        private  GetFollowingObserver observer;
 
-        public  GetFollowingHandler(GetFollowingObserver observer) {
+        private GetFollowingObserver observer;
+
+        public GetFollowingHandler(GetFollowingObserver observer) {
             this.observer = observer;
         }
 
@@ -170,6 +171,7 @@ public class FollowService extends Service {
         private  GetFollowersObserver observer;
 
         public GetFollowersHandler(GetFollowersObserver observer) {
+//            super(Looper.getMainLooper());
             this.observer = observer;
         }
 
