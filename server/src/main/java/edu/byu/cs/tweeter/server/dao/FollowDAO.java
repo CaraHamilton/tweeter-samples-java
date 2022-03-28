@@ -2,10 +2,15 @@ package edu.byu.cs.tweeter.server.dao;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import edu.byu.cs.tweeter.model.domain.User;
+import edu.byu.cs.tweeter.model.net.request.FollowersRequest;
 import edu.byu.cs.tweeter.model.net.request.FollowingRequest;
+import edu.byu.cs.tweeter.model.net.request.IsFollowerRequest;
+import edu.byu.cs.tweeter.model.net.response.FollowersResponse;
 import edu.byu.cs.tweeter.model.net.response.FollowingResponse;
+import edu.byu.cs.tweeter.model.net.response.IsFollowerResponse;
 import edu.byu.cs.tweeter.util.FakeData;
 
 /**
@@ -23,7 +28,7 @@ public class FollowDAO {
     public Integer getFolloweeCount(User follower) {
         // TODO: uses the dummy data.  Replace with a real implementation.
         assert follower != null;
-        return getDummyFollowees().size();
+        return getDummyFollowees().size() - 1;
     }
 
     /**
@@ -99,6 +104,48 @@ public class FollowDAO {
      */
     List<User> getDummyFollowees() {
         return getFakeData().getFakeUsers();
+    }
+    List<User> getDummyFollowers() {
+        return getFakeData().getFakeUsers();
+    }
+
+
+    public Integer getFollowersCount(User followee) {
+        // TODO: uses the dummy data.  Replace with a real implementation.
+        assert followee != null;
+        return getDummyFollowees().size() - 1;
+    }
+
+    public FollowersResponse getFollowers(FollowersRequest request) {
+        // TODO: Generates dummy data. Replace with a real implementation.
+        assert request.getLimit() > 0;
+        assert request.getFolloweeAlias() != null;
+
+        List<User> allFollowers = getDummyFollowees();
+        List<User> responseFollowers = new ArrayList<>(request.getLimit());
+
+        boolean hasMorePages = false;
+
+        if(request.getLimit() > 0) {
+            if (allFollowers != null) {
+                int followersIndex = getFolloweesStartingIndex(request.getLastFollowerAlias(), allFollowers);
+
+                for(int limitCounter = 0; followersIndex < allFollowers.size() && limitCounter < request.getLimit(); followersIndex++, limitCounter++) {
+                    responseFollowers.add(allFollowers.get(followersIndex));
+                }
+
+                hasMorePages = followersIndex < allFollowers.size();
+            }
+        }
+
+        return new FollowersResponse(responseFollowers, hasMorePages);
+    }
+
+    public IsFollowerResponse isFollower(IsFollowerRequest request) {
+        // TODO: uses the dummy data.  Replace with a real implementation.
+        assert request.getFolloweeAlias() != null;
+        assert request.getFollowerAlias() != null;
+        return new IsFollowerResponse(new Random().nextInt() > 0); //will take this out
     }
 
     /**

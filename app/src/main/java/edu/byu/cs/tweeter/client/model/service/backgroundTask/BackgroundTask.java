@@ -1,9 +1,15 @@
-package edu.byu.cs.tweeter.client.model.service;
+package edu.byu.cs.tweeter.client.model.service.backgroundTask;
 
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
+
+import java.io.IOException;
+
+import edu.byu.cs.tweeter.client.model.net.ServerFacade;
+import edu.byu.cs.tweeter.model.net.TweeterRemoteException;
+import edu.byu.cs.tweeter.util.FakeData;
 
 public abstract class BackgroundTask implements Runnable {
 
@@ -15,19 +21,38 @@ public abstract class BackgroundTask implements Runnable {
 
     protected final Handler messageHandler;
 
+    private ServerFacade serverFacade;
+
     protected BackgroundTask(Handler messageHandler) {
         this.messageHandler = messageHandler;
+    }
+
+    ServerFacade getServerFacade() {
+        if(serverFacade == null) {
+            serverFacade = new ServerFacade();
+        }
+
+        return serverFacade;
     }
 
     @Override
     public void run() {
         try {
             runTask();
-        } catch (Exception ex) {
+        } catch (IOException | TweeterRemoteException ex) {
             Log.e(LOG_TAG, ex.getMessage(), ex);
             sendExceptionMessage(ex);
         }
     }
+
+    //take this out after refactoring!!
+    protected FakeData getFakeData() {
+        return new FakeData();
+    }
+
+//    protected abstract void runTask() throws IOException;
+
+
 
     // This method is public instead of protected to make it accessible to test cases
     public void sendSuccessMessage() {
@@ -65,5 +90,5 @@ public abstract class BackgroundTask implements Runnable {
         messageHandler.sendMessage(msg);
     }
 
-    protected abstract void runTask();
+    protected abstract void runTask() throws IOException, TweeterRemoteException;
 }
